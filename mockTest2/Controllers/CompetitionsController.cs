@@ -75,7 +75,7 @@ namespace mockTest2.Controllers
                 {
                     DriverId = dto.DriverId,
                     CompetitionId = dto.CompetitionId,
-                    Date = dto.Date // Ensure dto.Date is provided in the request body
+                    Date = dto.Date 
                 };
 
                 _context.DriverCompetitions.Add(driverCompetition);
