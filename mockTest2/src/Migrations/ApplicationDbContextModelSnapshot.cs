@@ -33,6 +33,12 @@ namespace mockTest2.Migrations
                     b.Property<int>("CarManufacturerId")
                         .HasColumnType("int");
 
+                    b.Property<byte[]>("ConcurrencyToken")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
                     b.Property<string>("ModelName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -95,6 +101,12 @@ namespace mockTest2.Migrations
                     b.Property<int>("CarId")
                         .HasColumnType("int");
 
+                    b.Property<byte[]>("ConcurrencyToken")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
                     b.Property<string>("FirstName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -118,6 +130,12 @@ namespace mockTest2.Migrations
                     b.Property<int>("CompetitionId")
                         .HasColumnType("int");
 
+                    b.Property<byte[]>("ConcurrencyToken")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
                     b.Property<DateTime>("Date")
                         .HasColumnType("datetime2");
 
@@ -133,7 +151,7 @@ namespace mockTest2.Migrations
                     b.HasOne("mockTest2.Models.CarManufacturer", "CarManufacturer")
                         .WithMany()
                         .HasForeignKey("CarManufacturerId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("CarManufacturer");
@@ -144,7 +162,7 @@ namespace mockTest2.Migrations
                     b.HasOne("mockTest2.Models.Car", "Car")
                         .WithMany()
                         .HasForeignKey("CarId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Car");
@@ -153,30 +171,20 @@ namespace mockTest2.Migrations
             modelBuilder.Entity("mockTest2.Models.DriverCompetition", b =>
                 {
                     b.HasOne("mockTest2.Models.Competition", "Competition")
-                        .WithMany("DriverCompetitions")
+                        .WithMany()
                         .HasForeignKey("CompetitionId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("mockTest2.Models.Driver", "Driver")
-                        .WithMany("DriverCompetitions")
+                        .WithMany()
                         .HasForeignKey("DriverId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Competition");
 
                     b.Navigation("Driver");
-                });
-
-            modelBuilder.Entity("mockTest2.Models.Competition", b =>
-                {
-                    b.Navigation("DriverCompetitions");
-                });
-
-            modelBuilder.Entity("mockTest2.Models.Driver", b =>
-                {
-                    b.Navigation("DriverCompetitions");
                 });
 #pragma warning restore 612, 618
         }

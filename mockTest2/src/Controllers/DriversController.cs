@@ -20,9 +20,12 @@ namespace mockTest2.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<DriverDto>>> GetDrivers([FromQuery] string sortBy = "FirstName")
+        public async Task<ActionResult<IEnumerable<DriverDto>>> GetDrivers([FromQuery] string sortBy = "FirstName", CancellationToken cancellationToken = default)
         {
-            var drivers = await _context.Drivers.Include(d => d.Car).ThenInclude(c => c.CarManufacturer).ToListAsync();
+            var drivers = await _context.Drivers
+                .Include(d => d.Car)
+                .ThenInclude(c => c.CarManufacturer)
+                .ToListAsync(cancellationToken);
 
             drivers = sortBy switch
             {
@@ -48,12 +51,12 @@ namespace mockTest2.Controllers
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<DriverDto>> GetDriverById(int id)
+        public async Task<ActionResult<DriverDto>> GetDriverById(int id, CancellationToken cancellationToken = default)
         {
             var driver = await _context.Drivers
                 .Include(d => d.Car)
                 .ThenInclude(c => c.CarManufacturer)
-                .FirstOrDefaultAsync(d => d.Id == id);
+                .FirstOrDefaultAsync(d => d.Id == id, cancellationToken);
 
             if (driver == null)
             {
@@ -77,11 +80,11 @@ namespace mockTest2.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> CreateDriver(CreateDriverDto createDriverDto)
+        public async Task<IActionResult> CreateDriver(CreateDriverDto createDriverDto, CancellationToken cancellationToken = default)
         {
             try
             {
-                var car = await _context.Cars.FindAsync(createDriverDto.CarId);
+                var car = await _context.Cars.FindAsync(new object[] { createDriverDto.CarId }, cancellationToken);
                 if (car == null)
                 {
                     return BadRequest(new { Message = "Invalid CarId. Car not found." });
@@ -92,11 +95,12 @@ namespace mockTest2.Controllers
                     FirstName = createDriverDto.FirstName,
                     LastName = createDriverDto.LastName,
                     Birthday = createDriverDto.Birthday,
-                    CarId = createDriverDto.CarId
+                    CarId = createDriverDto.CarId,
+                    ConcurrencyToken = new byte[8] // или другой механизм для генерации токена
                 };
 
                 _context.Drivers.Add(driver);
-                await _context.SaveChangesAsync();
+                await _context.SaveChangesAsync(cancellationToken);
 
                 return CreatedAtAction(nameof(GetDriverById), new { id = driver.Id }, driver);
             }
@@ -105,6 +109,27 @@ namespace mockTest2.Controllers
                 _logger.LogError(ex, "An error occurred while creating the driver");
                 return StatusCode(500, new { title = "Internal server error. Please retry later.", status = 500 });
             }
+        }
+
+        [HttpGet("competitions")]
+        public async Task<ActionResult<IEnumerable<Competition>>> GetCompetitions()
+        {
+            var comps = await _context.Competitions.ToListAsync();
+
+            return comps.ToList();
+        }
+
+        [HttpGet("competitions/{id}")]
+        public async Task<ActionResult<Competition>> GetCompetitionById(int id, CancellationToken cancellationToken = default)
+        {
+            var competition = await _context.Competitions.FindAsync(new object[] { id }, cancellationToken);
+
+            if (competition == null)
+            {
+                return NotFound(new { Message = "Competition not found" });
+            }
+
+            return Ok(competition);
         }
     }
 }
