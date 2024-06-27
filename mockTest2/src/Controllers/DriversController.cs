@@ -96,7 +96,7 @@ namespace mockTest2.Controllers
                     LastName = createDriverDto.LastName,
                     Birthday = createDriverDto.Birthday,
                     CarId = createDriverDto.CarId,
-                    ConcurrencyToken = new byte[8] // или другой механизм для генерации токена
+                    ConcurrencyToken = new byte[8] 
                 };
 
                 _context.Drivers.Add(driver);
